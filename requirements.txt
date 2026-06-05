@@ -1,0 +1,18 @@
+# PyTorch with CUDA 12.8, for the RTX 4060 (Ada / sm_89).
+# The "+cu128" local version forces the CUDA wheel from the PyTorch index
+# instead of the CPU build on PyPI.
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch==2.11.0+cu128
+
+# Scientific / EEG stack
+numpy
+scipy
+mne>=1.10
+scikit-learn
+pyyaml
+einops
+matplotlib
+tqdm
+
+# Testing
+pytest

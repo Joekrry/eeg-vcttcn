@@ -1,0 +1,57 @@
+# Default configuration for the CVTTCN project.
+# Mirrors the dataclass defaults in src/cvttcn/config.py (kept in sync by a unit test).
+# Task: binary imagined left-vs-right fist motor imagery, pooled cross-subject split.
+
+data:
+  data_root: data
+  subjects: null            # null => all valid subjects
+  excluded_subjects: [88, 89, 92, 100]   # inconsistent records in EEGMMIDB
+  runs: [4, 8, 12]          # imagined left/right fist
+  n_subjects_max: 109
+  sfreq: 160.0
+  l_freq: 8.0
+  h_freq: 30.0
+  tmin: 0.0
+  tmax: 4.0
+  n_channels: 64
+  normalize: zscore
+  val_size: 0.15
+  test_size: 0.15
+  split_seed: 42
+
+model:
+  in_channels: 1
+  num_classes: 2
+  cvt:
+    embed_dim: 64
+    depth: 4
+    num_heads: 8
+    mlp_ratio: 4.0
+    embed_kernel: 7
+    embed_stride: 4
+    proj_kernel: 3
+    proj_stride_kv: 2
+    proj_stride_q: 1
+    dropout: 0.1
+    attn_dropout: 0.1
+  tcn:
+    channels: [64, 64, 64]
+    kernel_size: 3
+    dropout: 0.2
+
+train:
+  batch_size: 64
+  epochs: 100
+  lr: 0.001
+  weight_decay: 0.0001
+  optimizer: adamw
+  scheduler: cosine
+  warmup_epochs: 5
+  label_smoothing: 0.0
+  early_stopping_patience: 15
+  amp: true
+  grad_clip: 1.0
+  num_workers: 0
+  seed: 42
+  device: auto
+  checkpoint_dir: checkpoints
