@@ -18,6 +18,11 @@ data:
   val_size: 0.15
   test_size: 0.15
   split_seed: 42
+  augment:
+    enabled: true
+    time_shift: 20
+    noise_std: 0.1
+    channel_dropout: 0.1
 
 model:
   in_channels: 1

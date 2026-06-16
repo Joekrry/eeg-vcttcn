@@ -18,6 +18,16 @@ import yaml
 
 
 @dataclass
+class AugmentConfig:
+    """Training-time data augmentation (applied to the train split only)."""
+
+    enabled: bool = True
+    time_shift: int = 20          # max |samples| to circularly roll along time
+    noise_std: float = 0.1        # gaussian noise std (data is ~unit-scale post z-score)
+    channel_dropout: float = 0.1  # per-channel zeroing probability
+
+
+@dataclass
 class DataConfig:
     """Dataset selection, signal preprocessing, and split settings."""
 
@@ -44,6 +54,8 @@ class DataConfig:
     val_size: float = 0.15
     test_size: float = 0.15
     split_seed: int = 42
+
+    augment: AugmentConfig = field(default_factory=AugmentConfig)
 
 
 @dataclass
@@ -145,6 +157,12 @@ class Config:
             raise ValueError("h_freq must be greater than l_freq.")
         if d.tmax <= d.tmin:
             raise ValueError("tmax must be greater than tmin.")
+        if not (0.0 <= d.augment.channel_dropout < 1.0):
+            raise ValueError("augment.channel_dropout must be in [0, 1).")
+        if d.augment.noise_std < 0.0:
+            raise ValueError("augment.noise_std must be non-negative.")
+        if d.augment.time_shift < 0:
+            raise ValueError("augment.time_shift must be non-negative.")
         if m.num_classes < 2:
             raise ValueError("num_classes must be at least 2.")
         if t.device not in {"auto", "cuda", "cpu"}:
