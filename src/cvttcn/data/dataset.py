@@ -90,6 +90,10 @@ def split_by_trial(data: EpochedData, cfg: DataConfig) -> DataSplit:
         random_state=cfg.split_seed,
         stratify=trial_labels,
     )
+    # train_test_split returns array-likes; normalise to ndarray for indexing.
+    tv_pos = np.asarray(tv_pos)
+    test_pos = np.asarray(test_pos)
+
     # val size expressed relative to the remaining (train+val) trials
     rel_val = cfg.val_size / (1.0 - cfg.test_size)
     train_pos, val_pos = train_test_split(
@@ -98,6 +102,8 @@ def split_by_trial(data: EpochedData, cfg: DataConfig) -> DataSplit:
         random_state=cfg.split_seed,
         stratify=trial_labels[tv_pos],
     )
+    train_pos = np.asarray(train_pos)
+    val_pos = np.asarray(val_pos)
 
     def epochs_of(trial_positions: np.ndarray) -> np.ndarray:
         return np.where(np.isin(trials, uniq[trial_positions]))[0]
@@ -134,10 +140,20 @@ def build_dataloaders(data: EpochedData, cfg: Config) -> DataLoaders:
     train_ds, val_ds, test_ds = make_datasets(data, split, cfg)
 
     generator = torch.Generator().manual_seed(cfg.train.seed)
-    common = dict(batch_size=cfg.train.batch_size, num_workers=cfg.train.num_workers)
+    batch_size = cfg.train.batch_size
+    num_workers = cfg.train.num_workers
     train_loader = DataLoader(
-        train_ds, shuffle=True, drop_last=False, generator=generator, **common
+        train_ds,
+        batch_size=batch_size,
+        shuffle=True,
+        drop_last=False,
+        num_workers=num_workers,
+        generator=generator,
     )
-    val_loader = DataLoader(val_ds, shuffle=False, **common)
-    test_loader = DataLoader(test_ds, shuffle=False, **common)
+    val_loader = DataLoader(
+        val_ds, batch_size=batch_size, shuffle=False, num_workers=num_workers
+    )
+    test_loader = DataLoader(
+        test_ds, batch_size=batch_size, shuffle=False, num_workers=num_workers
+    )
     return DataLoaders(train_loader, val_loader, test_loader, split)

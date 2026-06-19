@@ -191,7 +191,9 @@ def _build(cls: type, data: Any) -> Any:
     kwargs: dict[str, Any] = {}
     for name, value in data.items():
         ftype = valid[name].type
-        if is_dataclass(ftype) and isinstance(value, dict):
+        # Recurse only when the field is a nested dataclass *type* (not an
+        # instance), which also narrows ftype to ``type`` for the type checker.
+        if isinstance(ftype, type) and is_dataclass(ftype) and isinstance(value, dict):
             kwargs[name] = _build(ftype, value)
         else:
             kwargs[name] = value
