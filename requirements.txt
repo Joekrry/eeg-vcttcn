@@ -2,7 +2,7 @@
 # The "+cu128" local version forces the CUDA wheel from the PyTorch index
 # instead of the CPU build on PyPI.
 --extra-index-url https://download.pytorch.org/whl/cu128
-torch==2.11.0+cu128
+torch==2.13.0
 
 # Scientific / EEG stack
 numpy
